@@ -1,0 +1,32 @@
+name: Rappels de la veille
+
+on:
+  schedule:
+    - cron: "0 17 * * *"   # 18 h à Paris en hiver, 19 h en été (GitHub compte en heure UTC)
+  workflow_dispatch:
+    inputs:
+      essai:
+        description: "Mode essai : afficher les notifications sans les envoyer"
+        type: boolean
+        default: true
+      date:
+        description: "Jour visé (AAAA-MM-JJ), vide = demain"
+        required: false
+
+jobs:
+  rappels:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci --omit=optional --no-audit --no-fund
+      - name: Envoyer les notifications
+        run: node scripts/rappels.cjs
+        env:
+          SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
+          VAPID_PRIVATE_KEY: ${{ secrets.VAPID_PRIVATE_KEY }}
+          ESSAI: ${{ github.event_name == 'workflow_dispatch' && inputs.essai && '1' || '' }}
+          DATE_RAPPEL: ${{ inputs.date }}

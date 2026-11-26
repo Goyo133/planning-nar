@@ -1,0 +1,15 @@
+{
+  "name": "planning-neuro-anesthesie",
+  "private": true,
+  "description": "Planning des anesthésistes de neuro-anesthésie-réanimation",
+  "scripts": {
+    "build": "node scripts/build.cjs",
+    "rappels": "node scripts/rappels.cjs"
+  },
+  "dependencies": {
+    "@xmldom/xmldom": "0.8.10",
+    "jszip": "3.10.1",
+    "pdfjs-dist": "3.11.174",
+    "web-push": "3.6.7"
+  }
+}

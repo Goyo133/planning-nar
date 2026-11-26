@@ -1,0 +1,705 @@
+<title>Planning Neuro-Anesthésie</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Sans+Condensed:wght@600;700&family=IBM+Plex+Mono:wght@500&display=swap">
+<style>
+/* Layout: one column app — sticky header (médecin + vue + navigation), then the selected view; import tucked at the bottom. */
+:root{
+  --bg:#f3f6f7; --surface:#ffffff; --ink:#14232b; --muted:#5b6d76; --line:#d9e2e6; --accent:#0b6e7f; --accent-ink:#ffffff; --soft:#e6eff1;
+  --rea:#0f7a6b; --rea-bg:#dff2ee; --bloc:#2f5fb3; --bloc-bg:#e3ebfa; --rx:#8a4f96; --rx-bg:#f6e6f6; --tdm:#6b3fa0;--tdm-bg:#e9ddf7;--consult:#9a6a00; --consult-bg:#fbf0d6;
+  --garde:#b3261e; --garde-bg:#fbe4e2; --astr:#b85a12; --astr-bg:#fcebdc; --off:#8a979d; --off-bg:#eceff0; --we:#eef1f2;
+  --f-display:"IBM Plex Sans Condensed","Arial Narrow",system-ui,sans-serif; --f-body:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",sans-serif; --f-mono:"IBM Plex Mono",ui-monospace,Menlo,monospace;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#0f171b; --surface:#16222852; --surface:#172328; --ink:#e4edf0; --muted:#93a6ae; --line:#2a3a41; --accent:#4fb8c9; --accent-ink:#06262c; --soft:#1e2e35;
+  --rea:#5fd0bd; --rea-bg:#123a34; --bloc:#8fb0f0; --bloc-bg:#1b2c4a; --rx:#c3a2ec; --rx-bg:#2e2242; --tdm:#b9a0f0;--tdm-bg:#2c2450;--consult:#e5bd5c; --consult-bg:#3a2e10;
+  --garde:#ff8f86; --garde-bg:#47201d; --astr:#f3a565; --astr-bg:#432a15; --off:#7d8c92; --off-bg:#212d32; --we:#131e23; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0f171b; --surface:#172328; --ink:#e4edf0; --muted:#93a6ae; --line:#2a3a41; --accent:#4fb8c9; --accent-ink:#06262c; --soft:#1e2e35;
+  --rea:#5fd0bd; --rea-bg:#123a34; --bloc:#8fb0f0; --bloc-bg:#1b2c4a; --rx:#c3a2ec; --rx-bg:#2e2242; --tdm:#b9a0f0;--tdm-bg:#2c2450;--consult:#e5bd5c; --consult-bg:#3a2e10;
+  --garde:#ff8f86; --garde-bg:#47201d; --astr:#f3a565; --astr-bg:#432a15; --off:#7d8c92; --off-bg:#212d32; --we:#131e23; color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:15px;line-height:1.45}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--surface)}
+.wrap{max-width:1080px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+header.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--surface);border-bottom:1px solid var(--line)}
+header.top .wrap{padding-block:12px;display:grid;gap:10px}
+.brand{display:flex;align-items:baseline;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.brand h1{font-family:var(--f-display);font-weight:700;font-size:1.3rem;letter-spacing:.01em;margin:0;text-wrap:balance}
+.brand small{color:var(--muted);font-size:.8rem}
+.who{display:flex;gap:6px;overflow-x:auto;padding-bottom:2px;scrollbar-width:thin}
+.who button{font-family:var(--f-mono);font-size:.85rem;min-width:44px;padding:6px 8px;border-radius:8px;border:1px solid var(--line);background:var(--bg);color:var(--ink);cursor:pointer;flex:0 0 auto}
+.who button[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.who button.all{font-family:var(--f-body);font-weight:500}
+.bar{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:9px;overflow:hidden}
+.seg button{border:0;background:transparent;color:var(--ink);padding:7px 12px;font:inherit;font-size:.88rem;cursor:pointer}
+.seg button[aria-pressed="true"]{background:var(--soft);font-weight:600;color:var(--accent)}
+.nav{display:inline-flex;align-items:center;gap:4px;margin-left:auto}
+.nav button{border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:8px;min-width:36px;height:34px;font:inherit;cursor:pointer}
+.nav .lbl{font-weight:600;min-width:9.5em;text-align:center;font-size:.92rem}
+button:focus-visible,input:focus-visible,label:focus-within{outline:2px solid var(--accent);outline-offset:2px}
+main .wrap{padding-block:18px 40px;display:grid;grid-template-columns:minmax(0,1fr);gap:18px}
+details.box .in,.list{grid-template-columns:minmax(0,1fr)}
+.note{color:var(--muted);font-size:.85rem}
+.empty{background:var(--surface);border:1px dashed var(--line);border-radius:12px;padding:22px;text-align:center;color:var(--muted)}
+
+/* chips */
+.chip{display:inline-flex;align-items:center;gap:6px;border-radius:7px;padding:3px 8px;font-size:.85rem;font-weight:600;white-space:nowrap;line-height:1.3}
+.chip .per{font-weight:500;font-size:.75rem;opacity:.85}
+.g-rea{background:var(--rea-bg);color:var(--rea)} .g-bloc{background:var(--bloc-bg);color:var(--bloc)} .g-rx{background:var(--rx-bg);color:var(--rx)}
+.g-tdm{background:var(--tdm-bg);color:var(--tdm)} .g-consult{background:var(--consult-bg);color:var(--consult)} .g-garde{background:var(--garde-bg);color:var(--garde)} .g-astr{background:var(--astr-bg);color:var(--astr)}
+.g-off{background:var(--off-bg);color:var(--off)}
+
+/* day view */
+.dayhead{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+.dayhead h2{font-family:var(--f-display);font-size:1.6rem;margin:0}
+.tag{font-size:.75rem;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);border:1px solid var(--line);border-radius:999px;padding:2px 8px}
+.mine{display:grid;gap:10px}
+.assign{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:14px 16px;display:grid;grid-template-columns:auto 1fr;gap:4px 14px;align-items:center}
+.assign .big{font-family:var(--f-display);font-weight:700;font-size:1.25rem;grid-row:span 2;padding:8px 12px;border-radius:10px;min-width:96px;text-align:center}
+.assign .meta{font-size:.9rem;color:var(--muted)}
+.assign .meta b{color:var(--ink);font-weight:600}
+.team{background:var(--surface);border:1px solid var(--line);border-radius:12px;overflow:hidden}
+.team h3{margin:0;padding:10px 16px;font-size:.78rem;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);border-bottom:1px solid var(--line)}
+.team ul{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr))}
+.team li{display:flex;justify-content:space-between;gap:10px;padding:9px 16px;border-bottom:1px solid var(--line);align-items:center}
+.team li .who2{font-family:var(--f-mono);font-size:.88rem;text-align:right}
+.team li .who2 mark{background:var(--accent);color:var(--accent-ink);border-radius:4px;padding:0 3px}
+
+/* week view */
+.week{display:grid;gap:8px}
+.wrow{display:grid;grid-template-columns:92px 1fr;gap:12px;align-items:center;background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:10px 14px;cursor:pointer;text-align:left;font:inherit;color:inherit}
+.wrow.we{background:var(--we)}
+.wrow.today{border-color:var(--accent);box-shadow:inset 3px 0 0 var(--accent)}
+.wrow .d{display:grid}
+.wrow .d b{font-family:var(--f-display);font-size:1.05rem}
+.wrow .d span{font-size:.8rem;color:var(--muted)}
+.wrow .c{display:flex;flex-wrap:wrap;gap:6px;min-width:0}
+.wrow .c .none{color:var(--muted);font-size:.88rem}
+
+/* month view */
+.month{background:var(--surface);border:1px solid var(--line);border-radius:12px;overflow:hidden}
+.mgrid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr))}
+.mgrid .h{font-size:.72rem;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);padding:8px 6px;border-bottom:1px solid var(--line);text-align:center}
+.mcell{min-height:92px;border-right:1px solid var(--line);border-bottom:1px solid var(--line);padding:6px;display:flex;flex-direction:column;gap:4px;cursor:pointer;background:transparent;font:inherit;color:inherit;text-align:left;border-top:0;border-left:0}
+.mcell:nth-child(7n){border-right:0}
+.mcell.we{background:var(--we)}
+.mcell.out{opacity:.45}
+.mcell .n{font-size:.8rem;font-weight:600;font-variant-numeric:tabular-nums}
+.mcell.today .n{background:var(--accent);color:var(--accent-ink);border-radius:999px;padding:0 6px;align-self:flex-start}
+.mcell .chip{font-size:.74rem;padding:2px 5px;white-space:normal}
+.mcell .chip .per{font-size:.68rem}
+@media (max-width:560px){
+  .mcell{min-height:64px;padding:4px 3px}
+  .mcell .chip{font-size:.66rem;padding:1px 3px;gap:2px}
+  .mcell .chip .lg{display:none}
+  .nav{margin-left:0;width:100%;justify-content:space-between}
+  header.top{position:static}
+  .brand h1{font-size:1.1rem}
+  .wrow{grid-template-columns:70px 1fr;padding:9px 10px}
+  .assign .big{min-width:80px;font-size:1.1rem}
+}
+@media (min-width:561px){.mcell .chip .sh{display:none}}
+@media (max-width:560px){.mcell .chip .sh{display:inline}}
+
+/* service grid */
+.svc{overflow-x:auto;background:var(--surface);border:1px solid var(--line);border-radius:12px}
+.svc table{border-collapse:collapse;width:100%;font-size:.84rem;font-variant-numeric:tabular-nums}
+.svc th,.svc td{border-bottom:1px solid var(--line);padding:6px 8px;text-align:center;white-space:nowrap}
+.svc th{font-size:.72rem;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);font-weight:600;position:sticky;top:0;background:var(--surface)}
+.svc td:first-child,.svc th:first-child{text-align:left;position:sticky;left:0;background:var(--surface)}
+.svc tr.we td{background:var(--we)}
+.svc td.closed{color:var(--off)}
+
+.legend{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+details.box{background:var(--surface);border:1px solid var(--line);border-radius:12px}
+details.box summary{padding:12px 16px;cursor:pointer;font-weight:600}
+details.box .in{padding:0 16px 16px;display:grid;gap:12px}
+.drop{border:2px dashed var(--line);border-radius:10px;padding:18px;text-align:center;display:grid;gap:8px;justify-items:center}
+.drop.over{border-color:var(--accent);background:var(--soft)}
+.btn{border:1px solid var(--accent);background:var(--accent);color:var(--accent-ink);border-radius:8px;padding:8px 14px;font:inherit;font-weight:600;cursor:pointer}
+.btn.ghost{background:transparent;color:var(--accent)}
+.btn[disabled]{opacity:.5;cursor:default}
+.msg{font-size:.88rem;padding:8px 12px;border-radius:8px;background:var(--soft)}
+.msg.err{background:var(--garde-bg);color:var(--garde)}
+.msg.ok{background:var(--rea-bg);color:var(--rea)}
+.list{display:grid;gap:4px;font-size:.88rem}
+ul.hyp{margin:0;padding-left:1.1em;color:var(--muted);font-size:.88rem;display:grid;gap:4px}
+.notif{display:flex;gap:12px;align-items:center;flex-wrap:wrap;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:12px 16px}
+.notif .t{flex:1 1 240px;min-width:0;font-size:.9rem}
+.notif .t b{display:block;font-size:.95rem}
+.keys{display:grid;gap:8px}
+.keys code{display:block;font-family:var(--f-mono);font-size:.78rem;word-break:break-all;background:var(--soft);padding:8px;border-radius:6px;user-select:all}
+.moddot{display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--accent);flex:0 0 auto}
+.team li.ed{cursor:pointer}
+.team li.ed:hover{background:var(--soft)}
+.team li .empty-p{color:var(--muted)}
+.team li.editor{grid-column:1/-1;display:grid;gap:12px;background:var(--soft);cursor:default;justify-content:stretch}
+.editor h4{margin:0;font-size:.95rem}
+.editor .row{display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end}
+.editor label.f{display:grid;gap:4px;font-size:.78rem;color:var(--muted)}
+.editor input[type=text],.editor input[type=password]{font-family:var(--f-mono);font-size:1rem;padding:7px 9px;border:1px solid var(--line);border-radius:8px;background:var(--surface);color:var(--ink);width:8.5em}
+.editor input[type=text]{text-transform:uppercase}
+.editor label.ck{display:flex;gap:6px;align-items:center;font-size:.88rem}
+.editor .orig{font-size:.85rem;color:var(--muted)}
+.editor .orig b{color:var(--ink)}
+.hint{font-size:.85rem;color:var(--muted)}
+.hist{display:grid;gap:2px;padding:9px 0;border-bottom:1px solid var(--line);font-size:.88rem}
+.hist .w{color:var(--muted);font-size:.8rem}
+.hist .ch{font-family:var(--f-mono)}
+@media (prefers-reduced-motion:no-preference){.chip,.wrow,.mcell{transition:background .15s}}
+</style>
+
+<header class="top">
+  <div class="wrap">
+    <div class="brand">
+      <h1>Planning Neuro-Anesthésie-Réanimation</h1>
+      <small id="srcinfo">Chargement…</small>
+    </div>
+    <div class="who" id="who" role="group" aria-label="Choisir un médecin"></div>
+    <div class="bar">
+      <div class="seg" role="group" aria-label="Vue">
+        <button id="v-day" data-v="day">Jour</button>
+        <button id="v-week" data-v="week">Semaine</button>
+        <button id="v-month" data-v="month">Mois</button>
+      </div>
+      <div class="nav">
+        <button id="prev" aria-label="Précédent">‹</button>
+        <span class="lbl" id="navlbl"></span>
+        <button id="next" aria-label="Suivant">›</button>
+        <button id="today" style="padding:0 10px">Auj.</button>
+      </div>
+    </div>
+  </div>
+</header>
+
+<main>
+  <div class="wrap">
+    <section id="view" aria-live="polite"></section>
+
+    <div class="notif" id="notifBox" hidden>
+      <div class="t" id="notifText"></div>
+      <div class="bar" id="notifBtns"></div>
+    </div>
+
+    <div class="legend" id="legend"></div>
+    <p class="hint" id="editHint" hidden>Pour changer un nom, ouvrez la vue Jour et touchez le poste dans « Équipe du jour ». Un point <span class="moddot"></span> signale une case modifiée.</p>
+
+    <details class="box" id="histBox" hidden>
+      <summary>Dernières modifications</summary>
+      <div class="in"><div id="histList" class="list"><p class="note">Chargement…</p></div></div>
+    </details>
+
+    <details class="box" id="importBox" hidden>
+      <summary id="importTitle">Importer un planning mensuel</summary>
+      <div class="in">
+        <p class="note" id="importWho">Déposez le planning du mois tel qu'il est diffusé (PDF exporté depuis Word, ou le fichier Word .docx). L'application lit le tableau, vous montre le résultat, puis vous l'enregistrez.</p>
+        <label class="drop" id="drop" for="file">
+          <span><b>Choisir un fichier</b> ou le glisser ici</span>
+          <span class="note">PDF ou Word (.docx), même mise en page que « planning Décembre 2026 »</span>
+          <input id="file" type="file" accept=".pdf,.docx,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document" hidden>
+        </label>
+        <div id="importOut" class="list"></div>
+        <div id="vapidBox" hidden>
+          <p class="note"><b>Notifications sur téléphone</b> · à faire une seule fois. Créez les deux clés ci-dessous, copiez la clé publique dans <code>config.js</code> et la clé privée dans le secret GitHub <code>VAPID_PRIVATE_KEY</code>. Créer de nouvelles clés plus tard désabonnerait tous les téléphones.</p>
+          <div class="bar"><button class="btn ghost" id="vapidGen">Créer les clés de notification</button></div>
+          <div class="keys" id="vapidOut"></div>
+        </div>
+      </div>
+    </details>
+
+  </div>
+</main>
+
+<script src="parser.js" charset="utf-8"></script>
+<script>
+(() => {
+"use strict";
+const P = window.NarParser;
+const {POSTS, DAYS, MONTHS, cap:DAYCAP, iso, D, addDays, wd, fmtLong, parseCell, showCell} = P;
+const esc = s => String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const $ = id => document.getElementById(id);
+const MABBR = ["janv.","févr.","mars","avr.","mai","juin","juil.","août","sept.","oct.","nov.","déc."];
+const mondayOf = s => addDays(s, -((wd(s)+6)%7));
+const todayIso = () => { const t=new Date(); return iso(new Date(Date.UTC(t.getFullYear(),t.getMonth(),t.getDate()))); };
+const fmtShort = s => { const d=D(s); return `${d.getUTCDate()} ${MABBR[d.getUTCMonth()]}`; };
+
+/* anciens enregistrements (clé "consult", Rx avec "X-Y") : mise au nouveau format */
+function normalizeDay(day){
+  if(day._n) return day;
+  const c = day.c||{};
+  const nc = ("consult" in c || (!("tdm" in c) && /-[A-Z]/i.test(c.rx||""))) ? P.upgradeLegacy(c, "tdm" in c, "consultm" in c || "consulta" in c) : c;
+  return {...day, c:nc, _n:true};
+}
+function assignmentsFor(day, doc){
+  const out=[];
+  for(const p of POSTS){
+    const c = parseCell(day.c[p.k]); if(!c||c.closed) continue;
+    const inAm=c.am.includes(doc), inPm=c.pm.includes(doc);
+    if(!inAm&&!inPm) continue;
+    const per = p.whole ? "" : p.fixed ? p.fixed : (inAm&&inPm ? "Journée" : inAm ? "Matin" : "Après-midi");
+    const others = [...new Set([...(inAm?c.am:[]),...(inPm?c.pm:[])])].filter(x=>x!==doc);
+    out.push({post:p, per, others, mod:!!(day.mods&&day.mods[p.k])});
+  }
+  return out;
+}
+const isOffDay = day => wd(day.d)===0 || wd(day.d)===6 || day.holiday;
+
+/* ---------- état ---------- */
+const store = { months:{} };
+let byDate = {}, baseByDate = {}, doctors = [];
+const Backend = {kind:null, canEdit:false, needsCode:false, overrides:{}};
+const E = {date:null, post:null, msg:""};   // case en cours de modification
+const S = { doc:null, view:"week", cur:null };
+try{ const p=JSON.parse(localStorage.getItem("nar-prefs")||"{}"); if(p.doc) S.doc=p.doc; if(p.view) S.view=p.view; }catch(e){}
+function savePrefs(){ try{ localStorage.setItem("nar-prefs",JSON.stringify({doc:S.doc,view:S.view})); }catch(e){} }
+
+function rebuild(){
+  byDate={}; const prio={};
+  const docs=Object.values(store.months).sort((a,b)=>(a.importedAt||"").localeCompare(b.importedAt||""));
+  for(const m of docs) for(const raw of (m.days||[])){
+    const day=normalizeDay(raw), own = day.d.slice(0,7)===m.key ? 1 : 0;   // le fichier du mois l'emporte sur le débord du mois voisin
+    if(!(day.d in prio) || own>=prio[day.d]){ byDate[day.d]=day; prio[day.d]=own; }
+  }
+  baseByDate = byDate; byDate = {...baseByDate};
+  for(const o of Object.values(Backend.overrides)){            // modifications faites dans l'application
+    const day=byDate[o.jour]; if(!day || !P.POSTS.some(p=>p.k===o.poste)) continue;
+    byDate[o.jour] = {...day, c:{...day.c, [o.poste]:o.valeur||""}, mods:{...(day.mods||{}), [o.poste]:o}};
+  }
+  const set=new Set();
+  for(const day of Object.values(byDate)) for(const p of POSTS){ const c=parseCell(day.c[p.k]); if(c&&!c.closed){ c.am.forEach(x=>set.add(x)); c.pm.forEach(x=>set.add(x)); } }
+  doctors=[...set].sort();
+  const dates=Object.keys(byDate).sort();
+  if(!S.cur || (S.auto && dates.length)){ S.auto=!dates.length; const t=todayIso(); S.cur = (dates.length && (t<dates[0]||t>dates[dates.length-1])) ? (t<dates[0]?dates[0]:dates[dates.length-1]) : t; }
+  const h=decodeURIComponent((location.hash||"").slice(1)).toUpperCase();
+  if(h && doctors.includes(h)) S.doc=h;
+  if(S.doc && S.doc!=="*" && !doctors.includes(S.doc) && doctors.length) S.doc=null;
+  const src = Object.values(store.months).sort((a,b)=>a.key.localeCompare(b.key)).map(m=>m.title).join(", ");
+  $("srcinfo").textContent = src ? `Plannings chargés : ${src}` : "Aucun planning chargé";
+  render();
+}
+
+/* ---------- affichage ---------- */
+const chip = (a, compact) => {
+  const per = a.per && a.per!=="Journée" && !a.post.fixed ? (a.per==="Matin"?"matin":"après-midi") : "";
+  const dot = a.mod ? `<span class="moddot" title="Modifié"></span>` : "";
+  if(compact) return `<span class="chip g-${a.post.g}"><span class="lg">${esc(a.post.lbl)}</span><span class="sh">${esc(a.post.sh)}</span>${per?`<span class="per">${per==="matin"?"mat":"apm"}</span>`:""}${dot}</span>`;
+  return `<span class="chip g-${a.post.g}">${esc(a.post.lbl)}${per?`<span class="per">${per}</span>`:""}${dot}</span>`;
+};
+function renderWho(){
+  $("who").innerHTML = doctors.map(d=>`<button data-doc="${esc(d)}" aria-pressed="${S.doc===d}">${esc(d)}</button>`).join("")
+    + (doctors.length?`<button class="all" data-doc="*" aria-pressed="${S.doc==="*"}">Tout le service</button>`:"");
+}
+function renderNav(){
+  for(const v of ["day","week","month"]) $("v-"+v).setAttribute("aria-pressed", S.view===v);
+  const l=$("navlbl");
+  if(S.view==="day") l.textContent=fmtLong(S.cur).replace(/ \d{4}$/,"");
+  else if(S.view==="week"){ const m=mondayOf(S.cur); l.textContent=`${fmtShort(m)} – ${fmtShort(addDays(m,6))}`; }
+  else { const d=D(S.cur); l.textContent=`${DAYCAP(MONTHS[d.getUTCMonth()])} ${d.getUTCFullYear()}`; }
+}
+function dayExtras(s, doc){
+  const prev=byDate[addDays(s,-1)]; const tags=[];
+  if(prev && parseCell(prev.c.garde)?.am?.includes(doc)) tags.push("Lendemain de garde");
+  return tags;
+}
+function renderDay(){
+  const s=S.cur, day=byDate[s], v=$("view");
+  let h=`<div class="dayhead"><h2>${esc(fmtLong(s))}</h2>${day&&isOffDay(day)?`<span class="tag">${wd(s)%6===0?"Week-end":"Férié"}</span>`:""}</div>`;
+  if(!day){ v.innerHTML=h+`<div class="empty">Pas de planning importé pour cette date.</div>`; return; }
+  if(S.doc && S.doc!=="*"){
+    const as=assignmentsFor(day,S.doc), ex=dayExtras(s,S.doc);
+    h+=`<div class="mine">`;
+    if(!as.length) h+=`<div class="empty"><b>${esc(S.doc)}</b> n'a pas de poste ce jour${ex.length?` · ${esc(ex.join(", "))}`:""}.</div>`;
+    for(const a of as) h+=`<div class="assign"><div class="big g-${a.post.g}">${esc(a.post.lbl)}</div>
+      <div><b>${a.per?esc(a.per):esc(a.post.lbl)}</b></div>
+      <div class="meta">${a.others.length?`Avec <b>${esc(a.others.join(", "))}</b>`:"Seul(e) sur le poste"}</div></div>`;
+    if(as.length && ex.length) h+=`<p class="note">${esc(ex.join(", "))}</p>`;
+    h+=`</div>`;
+  }
+  h+=`<div class="team"><h3>Équipe du jour${Backend.canEdit?" · touchez un poste pour le modifier":""}</h3><ul>`;
+  for(const p of POSTS){
+    const c=parseCell(day.c[p.k]), mod=day.mods&&day.mods[p.k];
+    if(!c && !Backend.canEdit && !mod) continue;
+    let who;
+    if(!c) who=`<span class="empty-p">—</span>`;
+    else if(c.closed) who=`<span style="color:var(--off)">fermé</span>`;
+    else {
+      const mark = list => list.length ? list.map(x=>x===S.doc?`<mark>${esc(x)}</mark>`:esc(x)).join("-") : "—";
+      who = c.am.join()===c.pm.join() ? mark(c.am) : `${mark(c.am)} / ${mark(c.pm)}`;
+    }
+    const open = E.date===s && E.post===p.k;
+    h+=`<li class="${Backend.canEdit?"ed":""}" ${Backend.canEdit?`data-edit="${p.k}" tabindex="0" role="button" aria-expanded="${open}"`:""}><span class="chip g-${c&&c.closed||!c?"off":p.g}">${esc(p.lbl)}</span><span class="who2">${who} ${mod?`<span class="moddot" title="Modifié"></span>`:""}</span></li>`;
+    if(open) h+=editorHtml(day, p, mod);
+  }
+  v.innerHTML=h+`</ul></div>`;
+}
+function renderWeek(){
+  const v=$("view"), m=mondayOf(S.cur), t=todayIso();
+  if(S.doc==="*"){ v.innerHTML=svcTable([...Array(7)].map((_,i)=>addDays(m,i))); return; }
+  let h=`<div class="week">`;
+  for(let i=0;i<7;i++){
+    const s=addDays(m,i), day=byDate[s], dt=D(s);
+    let c;
+    if(!day) c=`<span class="none">Pas de planning importé</span>`;
+    else { const as=assignmentsFor(day,S.doc), ex=dayExtras(s,S.doc);
+      c = as.map(a=>chip(a)).join("") || `<span class="none">${isOffDay(day)?"Repos":"Pas de poste"}</span>`;
+      if(ex.length) c+=`<span class="chip g-off">${esc(ex.join(", "))}</span>`; }
+    h+=`<button class="wrow${(day?isOffDay(day):i>4)?" we":""}${s===t?" today":""}" data-go="${s}">
+      <span class="d"><b>${DAYCAP(DAYS[dt.getUTCDay()]).slice(0,3)}. ${dt.getUTCDate()}</b><span>${esc(MONTHS[dt.getUTCMonth()])}</span></span>
+      <span class="c">${c}</span></button>`;
+  }
+  v.innerHTML=h+`</div>`;
+}
+function renderMonth(){
+  const v=$("view"), d=D(S.cur), y=d.getUTCFullYear(), mo=d.getUTCMonth();
+  const first=iso(new Date(Date.UTC(y,mo,1))), last=iso(new Date(Date.UTC(y,mo+1,0)));
+  if(S.doc==="*"){ const ds=[]; for(let s=first;s<=last;s=addDays(s,1)) ds.push(s); v.innerHTML=svcTable(ds); return; }
+  const start=mondayOf(first), t=todayIso();
+  let h=`<div class="month"><div class="mgrid">`+["Lun","Mar","Mer","Jeu","Ven","Sam","Dim"].map(x=>`<div class="h">${x}</div>`).join("");
+  for(let s=start; s<=last || wd(s)!==1; s=addDays(s,1)){
+    const day=byDate[s], as = day ? assignmentsFor(day,S.doc) : [];
+    h+=`<button class="mcell${(day?isOffDay(day):(wd(s)%6===0))?" we":""}${s.slice(0,7)!==first.slice(0,7)?" out":""}${s===t?" today":""}" data-go="${s}" aria-label="${esc(fmtLong(s))}">
+      <span class="n">${D(s).getUTCDate()}</span>${as.map(a=>chip(a,true)).join("")}</button>`;
+  }
+  v.innerHTML=h+`</div></div>`;
+}
+function svcTable(dates, src){
+  const get = src || (s=>byDate[s]);
+  let h=`<div class="svc"><table><thead><tr><th>Jour</th>${POSTS.map(p=>`<th>${esc(p.lbl)}</th>`).join("")}</tr></thead><tbody>`;
+  let any=false;
+  for(const s of dates){ const day=get(s); if(!day) continue; any=true;
+    h+=`<tr class="${isOffDay(day)?"we":""}"><td data-go="${s}" style="cursor:pointer"><b>${DAYCAP(DAYS[wd(s)]).slice(0,3)}. ${D(s).getUTCDate()}</b></td>`+
+      POSTS.map(p=>{const c=parseCell(day.c[p.k]), m=day.mods&&day.mods[p.k]; return `<td class="${c&&c.closed?"closed":""}">${c?esc(c.closed?"-0-":showCell(c)):""}${m?` <span class="moddot" title="Modifié"></span>`:""}</td>`;}).join("")+`</tr>`; }
+  return any ? h+`</tbody></table></div>` : `<div class="empty">Pas de planning importé pour cette période.</div>`;
+}
+function render(){
+  const keep = {}; document.querySelectorAll(".editor input").forEach(i=>{ keep[i.id] = i.type==="checkbox" ? i.checked : i.value; });
+  const focusId = document.activeElement && document.activeElement.closest && document.activeElement.closest(".editor") ? document.activeElement.id : null;
+  renderInner();
+  for(const id in keep){ const i=$(id); if(!i) continue; if(i.type==="checkbox") i.checked=keep[id]; else i.value=keep[id]; }
+  if(focusId && $(focusId)) $(focusId).focus();
+}
+function renderInner(){
+  renderWho(); renderNav(); if(Notif.sb) renderNotif();
+  const v=$("view");
+  if(!Object.keys(byDate).length){ v.innerHTML=`<div class="empty">Aucun planning n'est encore chargé.</div>`; return; }
+  if(!S.doc){ v.innerHTML=`<div class="empty">Choisissez vos initiales en haut pour voir votre planning.</div>`; return; }
+  ({day:renderDay,week:renderWeek,month:renderMonth})[S.view]();
+}
+$("legend").innerHTML = [["rea","Réanimation"],["bloc","Bloc"],["tdm","Radio TDM"],["rx","Radio"],["consult","Consultation"],["garde","Garde"],["astr","Astreinte"]]
+  .map(([g,l])=>`<span class="chip g-${g}">${l}</span>`).join("");
+
+/* ---------- modification d'une case ---------- */
+const store2 = { get:k=>{ try{ return localStorage.getItem(k)||""; }catch(e){ return ""; } }, set:(k,v)=>{ try{ localStorage.setItem(k,v); }catch(e){} } };
+const fmtWhen = t => { try{ return new Date(t).toLocaleString("fr-FR",{day:"numeric",month:"short",hour:"2-digit",minute:"2-digit"}); }catch(e){ return ""; } };
+const cleanNames = t => (t||"").toUpperCase().split(/[\s,;\-\/]+/).filter(Boolean);
+function editorHtml(day, p, mod){
+  const c = parseCell(day.c[p.k]), closed = !!(c&&c.closed);
+  const am = c&&!closed ? c.am.join("-") : "", pm = c&&!closed ? c.pm.join("-") : "";
+  const single = p.whole || p.fixed;
+  const author = store2.get("nar-author") || (S.doc && S.doc!=="*" ? S.doc : "");
+  const base = baseByDate[day.d] && baseByDate[day.d].c[p.k];
+  let h = `<li class="editor"><h4>${esc(p.lbl)} · ${esc(fmtLong(day.d))}</h4>`;
+  if(mod) h += `<p class="orig">Modifié par <b>${esc(mod.auteur||"?")}</b>${mod.le?` le ${esc(fmtWhen(mod.le))}`:""}. Prévu au départ : <b>${esc((mod.avant!=null?mod.avant:base)||"vide")}</b></p>`;
+  h += `<div class="row">`;
+  const split = !single && am!==pm;
+  if(single) h += `<label class="f">Médecin(s)<input type="text" id="ed-one" value="${esc(am||pm)}" autocomplete="off" placeholder="ex. AB"></label>`;
+  else h += `<label class="f" id="ed-dayw" ${split?"hidden":""}>Journée<input type="text" id="ed-day" value="${esc(split?"":am)}" autocomplete="off" placeholder="ex. AB"></label>`
+          + `<label class="f" id="ed-amw" ${split?"":"hidden"}>Matin<input type="text" id="ed-am" value="${esc(am)}" autocomplete="off" placeholder="ex. AB"></label>`
+          + `<label class="f" id="ed-pmw" ${split?"":"hidden"}>Après-midi<input type="text" id="ed-pm" value="${esc(pm)}" autocomplete="off" placeholder="ex. AB"></label>`;
+  h += `</div><div class="row">`;
+  if(!single) h += `<label class="ck"><input type="checkbox" id="ed-split" ${split?"checked":""}> Différent le matin et l'après-midi</label>`;
+  h += `<label class="ck"><input type="checkbox" id="ed-closed" ${closed?"checked":""}> Poste fermé</label></div>`;
+  h += `<div class="row"><label class="f">Vos initiales<input type="text" id="ed-author" value="${esc(author)}" autocomplete="off"></label>`;
+  if(Backend.needsCode) h += `<label class="f">Code du service<input type="password" id="ed-code" value="${esc(store2.get("nar-code"))}" autocomplete="off"></label>`;
+  h += `</div><p class="hint">Plusieurs médecins sur la même demi-journée : séparez par un tiret (AB-CD). Laissez vide pour retirer tout le monde.</p>`;
+  if(E.msg) h += `<div class="msg err">${esc(E.msg)}</div>`;
+  h += `<div class="row"><button class="btn" data-act="save">Enregistrer pour tous</button>${mod?`<button class="btn ghost" data-act="revert">Revenir au planning d'origine</button>`:""}<button class="btn ghost" data-act="close">Fermer</button></div></li>`;
+  return h;
+}
+async function editAction(act){
+  const day = byDate[E.date], p = POSTS.find(x=>x.k===E.post); if(!day||!p) return;
+  if(act==="close"){ E.date=E.post=null; E.msg=""; render(); return; }
+  const author = cleanNames($("ed-author").value).join("");
+  if(!/^[A-Z0-9]{1,4}$/.test(author)){ E.msg="Indiquez vos initiales (2 à 4 lettres) pour signer la modification."; render(); return; }
+  const code = $("ed-code") ? $("ed-code").value.trim() : "";
+  if(Backend.needsCode && !code){ E.msg="Le code du service est nécessaire pour modifier le planning."; render(); return; }
+  const mod = day.mods && day.mods[p.k];
+  const base = (baseByDate[day.d] && baseByDate[day.d].c[p.k]) || "";
+  let valeur = null;
+  if(act==="save"){
+    if($("ed-closed").checked) valeur = "-0-";
+    else if(p.whole || p.fixed) valeur = cleanNames($("ed-one").value).join("-");
+    else if(!$("ed-split").checked) valeur = cleanNames($("ed-day").value).join("-");
+    else { const a=cleanNames($("ed-am").value).join("-"), b=cleanNames($("ed-pm").value).join("-"); valeur = a===b ? a : `${a} / ${b}`; }
+    const bad = cleanNames(valeur.replace("-0-","")).filter(x=>!/^[A-Z0-9]{1,4}$/.test(x));
+    if(bad.length){ E.msg=`Initiales non reconnues : ${bad.join(", ")}.`; render(); return; }
+    if(valeur === (day.c[p.k]||"")){ E.date=E.post=null; E.msg=""; render(); return; }
+  }
+  const btns = document.querySelectorAll(".editor .btn"); btns.forEach(b=>b.disabled=true);
+  try{
+    const rec = {cle:`${day.d}_${p.k}`, jour:day.d, poste:p.k, valeur, avant: mod ? (mod.avant!=null?mod.avant:base) : base, auteur:author, le:new Date().toISOString()};
+    if(valeur===null || valeur===rec.avant) await Backend.cancel(rec, code, day.c[p.k]||"");
+    else await Backend.save(rec, code, day.c[p.k]||"");
+    store2.set("nar-author", author); if(code) store2.set("nar-code", code);
+    E.date=E.post=null; E.msg=""; render(); loadHistory();
+  }catch(e){
+    console.error(e);
+    if(e && e.code==="code_invalide"){ store2.set("nar-code",""); E.msg="Code du service incorrect."; }
+    else E.msg = "La modification n'a pas pu être enregistrée. Vérifiez la connexion et réessayez.";
+    render();
+  }
+}
+async function loadHistory(){
+  if(!Backend.history) return;
+  try{
+    const rows = await Backend.history();
+    const lbl = k => (POSTS.find(p=>p.k===k)||{lbl:k}).lbl;
+    $("histList").innerHTML = rows.length ? rows.map(r=>`<div class="hist"><span><b>${esc(lbl(r.poste))}</b> · ${esc(fmtLong(r.jour))}</span>
+      <span class="ch">${esc(r.avant||"vide")} → ${esc(r.annulation?"(planning d'origine) ":"")}${esc(r.apres||"vide")}</span>
+      <span class="w">par ${esc(r.auteur||"?")} · ${esc(fmtWhen(r.le))}</span></div>`).join("") : `<p class="note">Aucune modification pour l'instant.</p>`;
+  }catch(e){ console.error(e); $("histList").innerHTML=`<p class="note">Historique indisponible.</p>`; }
+}
+function enableEditing(){
+  $("editHint").hidden=false; $("histBox").hidden=false; render(); loadHistory();
+}
+$("view").addEventListener("click",e=>{
+  const b=e.target.closest(".editor [data-act]"); if(b){ e.stopPropagation(); editAction(b.dataset.act); return; }
+  if(e.target.closest(".editor")) return;
+  const li=e.target.closest("li[data-edit]"); if(!li||!Backend.canEdit) return;
+  const k=li.dataset.edit; if(E.date===S.cur && E.post===k){ E.date=E.post=null; } else { E.date=S.cur; E.post=k; } E.msg=""; render();
+  const f=[...document.querySelectorAll(".editor input[type=text]")].find(i=>!i.closest("[hidden]")); if(f) f.focus();
+});
+$("view").addEventListener("change",e=>{
+  if(e.target.id!=="ed-split") return;
+  const on=e.target.checked; $("ed-dayw").hidden=on; $("ed-amw").hidden=!on; $("ed-pmw").hidden=!on;
+  if(on){ if(!$("ed-am").value) $("ed-am").value=$("ed-day").value; if(!$("ed-pm").value) $("ed-pm").value=$("ed-day").value; }
+  else if(!$("ed-day").value) $("ed-day").value=$("ed-am").value;
+});
+$("view").addEventListener("keydown",e=>{
+  if(e.key==="Enter" && e.target.closest(".editor input")){ e.preventDefault(); editAction("save"); return; }
+  if((e.key==="Enter"||e.key===" ") && e.target.matches("li[data-edit]")){ e.preventDefault(); e.target.click(); }
+});
+
+/* ---------- interactions ---------- */
+$("who").addEventListener("click",e=>{const b=e.target.closest("button[data-doc]"); if(!b) return; S.doc=b.dataset.doc;
+  try{ history.replaceState(null,"",S.doc==="*"?location.pathname+location.search:"#"+S.doc.toLowerCase()); }catch(_){} savePrefs(); render();});
+document.querySelector(".seg").addEventListener("click",e=>{const b=e.target.closest("button[data-v]"); if(!b) return; S.view=b.dataset.v; savePrefs(); render();});
+function step(n){
+  if(S.view==="day") S.cur=addDays(S.cur,n);
+  else if(S.view==="week") S.cur=addDays(S.cur,7*n);
+  else { const d=D(S.cur); S.cur=iso(new Date(Date.UTC(d.getUTCFullYear(),d.getUTCMonth()+n,1))); }
+  render();
+}
+$("prev").onclick=()=>step(-1);
+$("next").onclick=()=>step(1);
+$("today").onclick=()=>{S.cur=todayIso(); render();};
+$("view").addEventListener("click",e=>{const g=e.target.closest("[data-go]"); if(!g||S.view==="day") return; S.cur=g.dataset.go; S.view="day"; savePrefs(); render(); window.scrollTo({top:0});});
+window.addEventListener("hashchange",()=>{const h=decodeURIComponent(location.hash.slice(1)).toUpperCase(); if(doctors.includes(h)){S.doc=h; render();}});
+let tx=null; $("view").addEventListener("touchstart",e=>{tx=e.touches[0].clientX;},{passive:true});
+$("view").addEventListener("touchend",e=>{ if(tx==null) return; const dx=e.changedTouches[0].clientX-tx; tx=null; if(Math.abs(dx)>70 && !e.target.closest(".svc,.editor")) step(dx<0?1:-1); });
+
+/* ---------- lecture des fichiers dans le navigateur ---------- */
+function loadScript(src){ return new Promise((res,rej)=>{ const s=document.createElement("script"); s.src=src; s.onload=res; s.onerror=()=>rej(new Error("Impossible de charger "+src)); document.head.appendChild(s); }); }
+async function readFile(f){
+  const buf = await f.arrayBuffer();
+  if(/\.docx$/i.test(f.name)){
+    if(!window.JSZip) await loadScript("https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js");
+    const zip = await JSZip.loadAsync(buf);
+    const xml = await zip.file("word/document.xml").async("string");
+    return P.parseDocxDom(new DOMParser().parseFromString(xml,"application/xml"), f.name);
+  }
+  if(!window.pdfjsLib){
+    await loadScript("https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js");
+    await loadScript("https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js"); // tourne dans la page, sans worker externe
+  }
+  const pdf = await pdfjsLib.getDocument({data:buf, isEvalSupported:false}).promise;
+  const tc = await (await pdf.getPage(1)).getTextContent();
+  return P.parsePdfItems(tc.items.map(i=>({s:i.str, x:i.transform[4], y:i.transform[5], w:i.width})), f.name);
+}
+
+/* ---------- import ---------- */
+let mode="local", db=null, canWrite=false, repoUrl=null, pending=null;
+const out = $("importOut");
+async function handleFile(f){
+  out.innerHTML=`<div class="msg">Lecture de « ${esc(f.name)} »…</div>`;
+  try{
+    const r = await readFile(f);
+    pending = P.monthRecord(r, f.name);
+    window.__lastImport = pending;
+    const first=r.days[0]?.d, last=r.days[r.days.length-1]?.d;
+    const replacing = store.months[pending.key];
+    const shared = mode==="artifact" && db && canWrite;
+    const fmtNote = r.format.hasTdm ? "" : " Ancien tableau sans colonne TDM : les noms après « - » en Radio sont placés au TDM.";
+    out.innerHTML = `<div class="msg ok">${esc(pending.title)} lu : ${r.days.length} jours, du ${esc(fmtLong(first))} au ${esc(fmtLong(last))}.${esc(fmtNote)}</div>`
+      + r.warn.map(w=>`<div class="msg err">${esc(w)}</div>`).join("")
+      + `<p class="note">Vérifiez le tableau ci-dessous.${replacing?` Il remplacera ${esc(replacing.title)} déjà chargé.`:""}</p>`
+      + `<div id="pv"></div><div class="bar">`
+      + (shared ? `<button class="btn" id="saveShared">Enregistrer pour tout le service</button>` : `<button class="btn" id="saveLocal">Afficher sur cet appareil</button>`)
+      + `<button class="btn ghost" id="cancelImp">Annuler</button></div>`
+      + (shared ? "" : mode==="github"
+          ? `<p class="note">Pour le publier pour tout le service, déposez ce même fichier dans le dossier <b>plannings</b> du dépôt GitHub${repoUrl?` (<a href="${esc(repoUrl)}/upload/main/plannings" target="_blank" rel="noopener">déposer un fichier</a>)`:""}. Le site se met à jour tout seul en 1 à 2 minutes.</p>`
+          : `<p class="note">${db?"Seuls les gestionnaires du planning peuvent l'enregistrer pour tout le service.":"L'aperçu reste sur cet appareil."}</p>`);
+    const map = Object.fromEntries(r.days.map(d=>[d.d,d]));
+    $("pv").innerHTML=svcTable(r.days.map(d=>d.d), s=>map[s]);
+    $("cancelImp").onclick=()=>{pending=null; out.innerHTML="";};
+    const sv=$("saveShared"), sl=$("saveLocal");
+    const goTo = () => { S.cur=pending.days.find(d=>d.d.slice(0,7)===pending.key)?.d||S.cur; };
+    if(sl) sl.onclick=()=>{ pending._local=true; store.months[pending.key]=pending; goTo(); out.innerHTML=`<div class="msg ok">${esc(pending.title)} affiché sur cet appareil.</div>`; pending=null; rebuild(); };
+    if(sv) sv.onclick=async()=>{ sv.disabled=true; sv.textContent="Enregistrement…";
+      try{ await db.doc("plannings/"+pending.key).set(pending); goTo(); out.innerHTML=`<div class="msg ok">${esc(pending.title)} enregistré. Tout le service le voit maintenant.</div>`; pending=null; }
+      catch(e){ sv.disabled=false; sv.textContent="Réessayer"; out.insertAdjacentHTML("beforeend",`<div class="msg err">L'enregistrement a échoué (${esc(e&&e.code||"erreur")}). ${e&&e.code==="invalid_argument"?"Votre accès ne permet pas de modifier le planning partagé.":"Réessayez dans un instant."}</div>`); } };
+  }catch(e){ console.error(e); out.innerHTML=`<div class="msg err">Ce fichier n'a pas pu être lu : ${esc(e.message||e)}</div>`; }
+}
+const fileIn=$("file"), drop=$("drop");
+fileIn.addEventListener("change",()=>{ if(fileIn.files[0]) handleFile(fileIn.files[0]); fileIn.value=""; });
+drop.addEventListener("dragover",e=>{e.preventDefault(); drop.classList.add("over");});
+drop.addEventListener("dragleave",()=>drop.classList.remove("over"));
+drop.addEventListener("drop",e=>{e.preventDefault(); drop.classList.remove("over"); const f=e.dataTransfer.files[0]; if(f) handleFile(f);});
+
+/* ---------- modifications partagées sur le site GitHub : base Supabase (voir supabase/installation.sql) ---------- */
+async function connectSupabase(){
+  try{ await loadScript("config.js"); }catch(e){ return; }
+  const cfg = window.NAR_CONFIG || {};
+  if(!cfg.supabaseUrl || !cfg.supabaseAnonKey || !/^https:\/\/[a-z0-9-]+\.supabase\.co$/.test(cfg.supabaseUrl)) return;
+  try{
+    if(!window.supabase) await loadScript("https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js");
+    const sb = window.supabase.createClient(cfg.supabaseUrl, cfg.supabaseAnonKey, {auth:{persistSession:false}});
+    const refresh = async () => {
+      const {data, error} = await sb.from("modifs").select("*"); if(error) throw error;
+      Backend.overrides = {}; for(const o of data||[]) Backend.overrides[o.cle]=o;
+      rebuild();
+    };
+    const call = async (rec, code, valeur, before) => {
+      const {error} = await sb.rpc("modifier", {p_code:code, p_jour:rec.jour, p_poste:rec.poste, p_valeur:valeur, p_avant:rec.avant, p_auteur:rec.auteur, p_actuel:before});
+      if(error){ const e=new Error(error.message); if(/code_invalide/.test(error.message)) e.code="code_invalide"; throw e; }
+      await refresh();
+    };
+    Backend.kind="supabase"; Backend.canEdit=true; Backend.needsCode=true;
+    Backend.save = (rec, code, before) => call(rec, code, rec.valeur, before);
+    Backend.cancel = (rec, code, before) => call(rec, code, null, before);
+    Backend.history = async () => { const {data, error} = await sb.from("historique").select("*").order("le",{ascending:false}).limit(40); if(error) throw error; return data||[]; };
+    await refresh();
+    sb.channel("modifs").on("postgres_changes", {event:"*", schema:"public", table:"modifs"}, () => { refresh().catch(()=>{}); loadHistory(); }).subscribe();
+    setInterval(()=>refresh().catch(()=>{}), 60000);
+    document.addEventListener("visibilitychange", ()=>{ if(!document.hidden) refresh().catch(()=>{}); });
+    enableEditing();
+    if(cfg.vapidPublicKey) setupNotif(sb, cfg.vapidPublicKey);
+  }catch(e){ console.error("Supabase", e); }
+}
+
+/* ---------- rappel la veille sur le téléphone (site GitHub uniquement) ---------- */
+const Notif = {sb:null, key:"", reg:null};
+const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform==="MacIntel" && navigator.maxTouchPoints>1);
+const standalone = window.matchMedia && matchMedia("(display-mode: standalone)").matches || navigator.standalone===true;
+const b64u = s => { const p="=".repeat((4-s.length%4)%4), b=atob((s+p).replace(/-/g,"+").replace(/_/g,"/")); return Uint8Array.from(b, c=>c.charCodeAt(0)); };
+function renderNotif(msg){
+  const box=$("notifBox"); if(!Notif.sb || !Notif.key){ box.hidden=true; return; }
+  const doc = S.doc && S.doc!=="*" ? S.doc : null, mine = store2.get("nar-notif");
+  box.hidden = !doc && !mine;
+  const t=$("notifText"), b=$("notifBtns"); b.innerHTML="";
+  const pushOk = "serviceWorker" in navigator && "PushManager" in window && "Notification" in window;
+  if(msg){ t.innerHTML = msg; }
+  else if(isIOS && !standalone){ t.innerHTML = `<b>Rappel la veille sur votre iPhone</b>Touchez <b>Partager</b> puis <b>« Sur l'écran d'accueil »</b>, puis ouvrez le planning depuis cette icône pour activer le rappel.`; return; }
+  else if(!pushOk){ t.innerHTML = `<b>Rappel la veille</b>Ce navigateur ne permet pas les notifications. Sur Android, utilisez Chrome ; sur iPhone, ajoutez le planning à l'écran d'accueil.`; return; }
+  else if(Notification.permission==="denied"){ t.innerHTML = `<b>Notifications bloquées</b>Autorisez les notifications pour ce site dans les réglages du téléphone, puis revenez ici.`; return; }
+  else if(mine){ t.innerHTML = `<b>Rappel activé pour ${esc(mine)}</b>Ce téléphone reçoit chaque soir vers 18 h vos postes du lendemain.`; }
+  else { t.innerHTML = `<b>Rappel la veille</b>Recevez chaque soir vers 18 h une notification avec vos postes du lendemain.`; }
+  if(mine && doc && doc!==mine) b.innerHTML += `<button class="btn" data-n="on">Passer à ${esc(doc)}</button>`;
+  if(!mine && doc) b.innerHTML += `<button class="btn" data-n="on">Me prévenir la veille (${esc(doc)})</button>`;
+  if(mine) b.innerHTML += `<button class="btn ghost" data-n="off">Arrêter le rappel</button>`;
+}
+$("notifBtns").addEventListener("click", async e => {
+  const b=e.target.closest("button[data-n]"); if(!b) return;
+  b.disabled=true;
+  try{
+    if(b.dataset.n==="on"){
+      const doc=S.doc;
+      const perm = await Notification.requestPermission();           // d'abord, pendant le geste de l'utilisateur
+      if(perm!=="granted"){ renderNotif(); return; }
+      const reg = Notif.reg || await navigator.serviceWorker.register("sw.js");
+      await navigator.serviceWorker.ready;
+      let sub = await reg.pushManager.getSubscription();
+      if(!sub) sub = await reg.pushManager.subscribe({userVisibleOnly:true, applicationServerKey:b64u(Notif.key)});
+      const j = sub.toJSON();
+      const {error} = await Notif.sb.rpc("abonner", {p_medecin:doc, p_endpoint:j.endpoint, p_p256dh:j.keys.p256dh, p_auth:j.keys.auth});
+      if(error) throw error;
+      store2.set("nar-notif", doc);
+      renderNotif(`<b>Rappel activé pour ${esc(doc)}</b>Vous recevrez une notification vers 18 h chaque veille de poste.`);
+      setTimeout(()=>renderNotif(), 8000);
+    } else {
+      const reg = Notif.reg || await navigator.serviceWorker.getRegistration();
+      const sub = reg && await reg.pushManager.getSubscription();
+      if(sub){ await Notif.sb.rpc("desabonner", {p_endpoint:sub.endpoint}); await sub.unsubscribe(); }
+      store2.set("nar-notif", "");
+      renderNotif();
+    }
+  }catch(err){ console.error(err); renderNotif(`<b>Le rappel n'a pas pu être activé.</b>Vérifiez la connexion, puis réessayez.`); }
+});
+async function setupNotif(sb, key){
+  Notif.sb=sb; Notif.key=key;
+  if("serviceWorker" in navigator){ try{ Notif.reg = await navigator.serviceWorker.register("sw.js"); }catch(e){ console.warn("sw", e); } }
+  renderNotif();
+}
+/* clés VAPID créées dans le navigateur du gestionnaire : la clé privée ne quitte pas cet écran */
+$("vapidGen").addEventListener("click", async () => {
+  try{
+    const k = await crypto.subtle.generateKey({name:"ECDSA", namedCurve:"P-256"}, true, ["sign","verify"]);
+    const raw = new Uint8Array(await crypto.subtle.exportKey("raw", k.publicKey));
+    const pub = btoa(String.fromCharCode(...raw)).replace(/\+/g,"-").replace(/\//g,"_").replace(/=+$/,"");
+    const priv = (await crypto.subtle.exportKey("jwk", k.privateKey)).d;
+    $("vapidOut").innerHTML = `<span class="note">Clé publique (config.js, vapidPublicKey)</span><code>${esc(pub)}</code><span class="note">Clé privée (secret GitHub VAPID_PRIVATE_KEY) — ne la donnez à personne</span><code>${esc(priv)}</code>`;
+  }catch(e){ $("vapidOut").innerHTML = `<div class="msg err">Ce navigateur ne sait pas créer les clés. Essayez avec Chrome ou Safari récent.</div>`; }
+});
+
+/* ---------- source des données : site GitHub (data/plannings.json) ou version d'essai Claude (base partagée) ---------- */
+rebuild();
+(async () => {
+  if(!(window.claude && window.claude.use)){
+    mode="github";
+    if(/[?&]gestion\b/.test(location.search)){ $("importBox").hidden=false; $("vapidBox").hidden=false; }   // réservé au gestionnaire : adresse du site + ?gestion
+    $("importTitle").textContent="Vérifier un nouveau planning avant de le publier";
+    $("importWho").textContent="Ouvrez le fichier du mois pour vérifier que l'application le lit correctement. Rien n'est publié depuis cette page.";
+    try{
+      const res = await fetch("data/plannings.json", {cache:"no-cache"});
+      if(!res.ok) throw new Error(res.status);
+      const data = await res.json();
+      repoUrl = typeof data.repoUrl==="string" && data.repoUrl.startsWith("https://github.com/") ? data.repoUrl : null;
+      for(const m of (data.months||[])) if(m && m.key && Array.isArray(m.days)) store.months[m.key]=m;
+      rebuild();
+      if(data.errors && data.errors.length) console.warn("Fichiers non lus :", data.errors);
+    }catch(e){ $("srcinfo").textContent="Planning introuvable."; }
+    connectSupabase();
+    return;
+  }
+  mode="artifact";
+  let timer = setTimeout(()=>{ if(!Object.keys(store.months).length) $("srcinfo").textContent="Le planning partagé ne répond pas. Rechargez la page."; },10000);
+  try{
+    db = await window.claude.use("db");
+    const user = await window.claude.use("user");
+    canWrite = user ? !!(await user.canEdit()) : false;
+    $("importBox").hidden = !canWrite;          // seuls les gestionnaires voient l'import ; les autres reçoivent le planning partagé
+    if(!db){ clearTimeout(timer); $("srcinfo").textContent="Planning partagé indisponible ici"; return; }
+    db.collection("plannings").onSnapshot(snap=>{
+      clearTimeout(timer);
+      store.months = Object.fromEntries(Object.entries(store.months).filter(([,v])=>v._local));
+      snap.docs.forEach(d=>{ const v=d.data(); if(v && Array.isArray(v.days)) store.months[d.id]={...v,key:d.id}; });
+      rebuild();
+    }, err=>{ clearTimeout(timer); $("srcinfo").textContent="Planning partagé indisponible ("+err.code+")"; });
+    // modifications : tout le service écrit dans « modifs », chaque changement est noté dans « historique »
+    const w = user ? await user.can("data.write") : null;
+    Backend.kind="artifact"; Backend.canEdit = w!==false; Backend.needsCode=false;
+    const logIt = (rec, before, after, undo) => db.collection("historique").add({jour:rec.jour, poste:rec.poste, avant:before, apres:after, auteur:rec.auteur, le:rec.le, annulation:!!undo});
+    Backend.save = async (rec, _code, before) => { await db.doc("modifs/"+rec.cle).set(rec); await logIt(rec, before, rec.valeur, false); };
+    Backend.cancel = async (rec, _code, before) => { await db.doc("modifs/"+rec.cle).delete(); await logIt(rec, before, rec.avant, true); };
+    Backend.history = async () => (await db.collection("historique").orderBy("le","desc").limit(40).get()).docs.map(d=>d.data());
+    db.collection("modifs").onSnapshot(snap=>{
+      Backend.overrides = {}; snap.docs.forEach(d=>{ const o=d.data(); if(o && o.jour && o.poste) Backend.overrides[d.id]=o; });
+      rebuild(); loadHistory();
+    }, err=>console.warn("modifs", err.code));
+    if(Backend.canEdit) enableEditing();
+  }catch(e){ clearTimeout(timer); console.error(e); }
+})();
+})();
+</script>
