@@ -5,7 +5,7 @@
 
 const POSTS = [
   {k:"rea1",lbl:"Réa 1",sh:"R1",g:"rea"},{k:"rea2",lbl:"Réa 2",sh:"R2",g:"rea"},{k:"rea3",lbl:"Réa 3",sh:"R3",g:"rea"},{k:"rea4",lbl:"Réa 4",sh:"R4",g:"rea"},
-  {k:"bloc1",lbl:"Bloc 1",sh:"B1",g:"bloc"},{k:"bloc2",lbl:"Bloc 2",sh:"B2",g:"bloc"},{k:"bloc3",lbl:"Bloc 3",sh:"B3",g:"bloc"},
+  {k:"bloc1",lbl:"Bloc 1",sh:"B1",g:"bloc"},{k:"bloc2",lbl:"Bloc 2",sh:"B2",g:"bloc"},{k:"bloc3",lbl:"Bloc 3",sh:"B3",g:"bloc",fixed:"Matin"},
   {k:"tdm",lbl:"Radio TDM",sh:"TDM",g:"tdm"},{k:"rx",lbl:"Radio",sh:"Rx",g:"rx"},
   {k:"consultm",lbl:"Consult. matin",sh:"CsM",g:"consult",fixed:"Matin"},{k:"consulta",lbl:"Consult. après-midi",sh:"CsA",g:"consult",fixed:"Après-midi"},
   {k:"garde",lbl:"Garde",sh:"G",g:"garde",whole:true},{k:"astreinte",lbl:"Astreinte",sh:"A",g:"astr",whole:true}
@@ -244,7 +244,8 @@ function parseDocxDom(doc, fname){
 const HOURS = {
   bloc1:{"Matin":"7h30-13h","Après-midi":"13h-18h30","Journée":"7h30-18h30"},
   bloc2:{"Matin":"7h30-13h","Après-midi":"13h-18h30","Journée":"7h30-18h30"},
-  bloc3:{"Matin":"7h30-13h"},
+  bloc3:{"*":"7h30-13h"},                                   // pas de Bloc 3 l'après-midi
+  rx:{"Matin":"7h30-13h","Après-midi":"13h-18h30","Journée":"7h30-18h30"},
   rea1:{"*":"8h30-18h30"}, rea2:{"*":"8h30-18h30"}, rea3:{"*":"8h30-15h"}, rea4:{"*":"8h30-14h"},
   tdm:{"*":"7h30-13h30"}, consultm:{"*":"10h-12h"}, consulta:{"*":"14h-17h"}
 };
