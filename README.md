@@ -32,7 +32,7 @@ Sans `config.js` rempli, le site reste en lecture seule.
 
 ## Notification la veille sur le téléphone
 
-Chaque soir vers 18 h (19 h en été), chaque médecin abonné reçoit sur son téléphone une notification avec ses postes du lendemain, par exemple « Demain, lundi 14 décembre : Bloc 2 (après-midi) · Astreinte ». Les modifications faites dans l'application sont prises en compte. Toucher la notification ouvre son planning.
+Chaque soir vers 18 h (heure de Paris, été comme hiver), chaque médecin abonné reçoit sur son téléphone une notification avec ses postes du lendemain, par exemple « Demain, lundi 14 décembre : Bloc 2 (après-midi) · Astreinte ». Les modifications faites dans l'application sont prises en compte. Toucher la notification ouvre son planning.
 
 **Pour chaque médecin** (une fois, sur son téléphone) :
 - **Android** : ouvrir le site dans Chrome, choisir ses initiales, toucher **Me prévenir la veille** et accepter les notifications.
