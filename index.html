@@ -579,7 +579,9 @@ async function connectSupabase(){
   if(!cfg.supabaseUrl || !cfg.supabaseAnonKey || !/^https:\/\/[a-z0-9-]+\.supabase\.co$/.test(cfg.supabaseUrl)) return;
   try{
     if(!window.supabase) await loadScript("https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js");
-    const sb = window.supabase.createClient(cfg.supabaseUrl, cfg.supabaseAnonKey, {auth:{persistSession:false}});
+    // Les nouvelles clés « sb_publishable_… » ne sont pas des jetons : on ne les envoie que dans l'en-tête apikey.
+    const plainFetch = (url, o={}) => { const h=new Headers(o.headers||{}); if(/^Bearer sb_/.test(h.get("Authorization")||"")) h.delete("Authorization"); return fetch(url, {...o, headers:h}); };
+    const sb = window.supabase.createClient(cfg.supabaseUrl, cfg.supabaseAnonKey, {auth:{persistSession:false}, global:{fetch:plainFetch}});
     const refresh = async () => {
       const {data, error} = await sb.from("modifs").select("*"); if(error) throw error;
       Backend.overrides = {}; for(const o of data||[]) Backend.overrides[o.cle]=o;

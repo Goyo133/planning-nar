@@ -21,7 +21,7 @@ function readConfig(){
 }
 const cfg = readConfig();
 async function sb(pathq, key, opts={}){
-  const res = await fetch(`${cfg.url}/rest/v1/${pathq}`, {...opts, headers:{apikey:key, Authorization:`Bearer ${key}`, ...(opts.headers||{})}});
+  const res = await fetch(`${cfg.url}/rest/v1/${pathq}`, {...opts, headers:{apikey:key, ...(key.startsWith("sb_") ? {} : {Authorization:`Bearer ${key}`}), ...(opts.headers||{})}});
   if(!res.ok) throw new Error(`Supabase ${res.status} ${await res.text()}`);
   return res.status===204 ? null : res.json().catch(()=>null);
 }
