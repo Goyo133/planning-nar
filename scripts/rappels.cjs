@@ -38,6 +38,12 @@ function assignments(day, doc){
   return P.staffFor(day, doc).map(st=>`${st.lbl} à ${st.h}`).concat(out);
 }
 
+// Deux créneaux programmés (16 h et 17 h UTC) : on n'envoie que celui qui correspond à 18 h à Paris.
+if(env.CRENEAU){
+  const h = +env.CRENEAU.split(" ")[1];
+  const off = +new Intl.DateTimeFormat("en-GB",{timeZone:"Europe/Paris",timeZoneName:"shortOffset"}).formatToParts(new Date()).find(x=>x.type==="timeZoneName").value.replace("GMT","") || 0;
+  if((h + off) % 24 !== 18){ console.log(`Créneau ${h} h UTC ignoré (il est ${(h+off)%24} h à Paris) : l'autre créneau envoie les rappels.`); process.exit(0); }
+}
 (async () => {
   if(!cfg.url || !cfg.anon){ console.log("config.js n'a pas d'adresse Supabase : aucune notification."); return; }
   const {months} = await loadMonths({log(){}, warn(){}, error:console.error});

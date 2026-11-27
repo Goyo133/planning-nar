@@ -2,7 +2,10 @@ name: Rappels de la veille
 
 on:
   schedule:
-    - cron: "0 17 * * *"   # 18 h à Paris en hiver, 19 h en été (GitHub compte en heure UTC)
+    # GitHub compte en heure UTC : 17 h UTC = 18 h à Paris en hiver, 16 h UTC = 18 h en été.
+    # Le script ne garde que le créneau qui tombe à 18 h à Paris ce jour-là.
+    - cron: "0 16 * * *"
+    - cron: "0 17 * * *"
   workflow_dispatch:
     inputs:
       essai:
@@ -30,3 +33,4 @@ jobs:
           VAPID_PRIVATE_KEY: ${{ secrets.VAPID_PRIVATE_KEY }}
           ESSAI: ${{ github.event_name == 'workflow_dispatch' && inputs.essai && '1' || '' }}
           DATE_RAPPEL: ${{ inputs.date }}
+          CRENEAU: ${{ github.event.schedule }}
