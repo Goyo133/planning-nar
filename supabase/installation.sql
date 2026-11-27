@@ -41,6 +41,9 @@ create policy "lecture" on public.historique for select to anon, authenticated u
 -- Droits de lecture (les nouveaux projets Supabase ne les donnent plus par défaut)
 grant usage on schema public to anon, authenticated;
 grant select on public.modifs, public.historique to anon, authenticated;
+grant usage on schema public to service_role;
+grant select, delete on public.abonnements to service_role;
+grant select on public.modifs to service_role;
 
 -- Seul chemin d'écriture : vérifie le code du service, puis enregistre et note dans l'historique.
 -- p_valeur = null : revenir au planning d'origine.
