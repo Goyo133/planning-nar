@@ -38,6 +38,9 @@ drop policy if exists "lecture" on public.modifs;
 drop policy if exists "lecture" on public.historique;
 create policy "lecture" on public.modifs     for select to anon, authenticated using (true);
 create policy "lecture" on public.historique for select to anon, authenticated using (true);
+-- Droits de lecture (les nouveaux projets Supabase ne les donnent plus par défaut)
+grant usage on schema public to anon, authenticated;
+grant select on public.modifs, public.historique to anon, authenticated;
 
 -- Seul chemin d'écriture : vérifie le code du service, puis enregistre et note dans l'historique.
 -- p_valeur = null : revenir au planning d'origine.
