@@ -30,10 +30,12 @@ function assignments(day, doc){
   for(const p of P.POSTS){
     const c = P.parseCell(day.c[p.k]); if(!c || c.closed) continue;
     const am=c.am.includes(doc), pm=c.pm.includes(doc); if(!am && !pm) continue;
-    const per = p.whole || p.fixed ? "" : (am&&pm ? "" : am ? " (matin)" : " (après-midi)");
-    out.push(p.lbl + per);
+    const half = am&&pm ? "Journée" : am ? "Matin" : "Après-midi";
+    const per = p.whole || p.fixed ? "" : (am&&pm ? "" : am ? " matin" : " après-midi");
+    const h = P.hoursFor(p.k, p.fixed || half);
+    out.push(p.lbl + (h ? ` ${h}` : per));
   }
-  return out;
+  return P.staffFor(day, doc).map(st=>`${st.lbl} à ${st.h}`).concat(out);
 }
 
 (async () => {

@@ -7,17 +7,17 @@
 :root{
   --bg:#f3f6f7; --surface:#ffffff; --ink:#14232b; --muted:#5b6d76; --line:#d9e2e6; --accent:#0b6e7f; --accent-ink:#ffffff; --soft:#e6eff1;
   --rea:#0f7a6b; --rea-bg:#dff2ee; --bloc:#2f5fb3; --bloc-bg:#e3ebfa; --rx:#8a4f96; --rx-bg:#f6e6f6; --tdm:#6b3fa0;--tdm-bg:#e9ddf7;--consult:#9a6a00; --consult-bg:#fbf0d6;
-  --garde:#b3261e; --garde-bg:#fbe4e2; --astr:#b85a12; --astr-bg:#fcebdc; --off:#8a979d; --off-bg:#eceff0; --we:#eef1f2;
+  --staff:#3c4a63; --staff-bg:#e2e7ef; --garde:#b3261e; --garde-bg:#fbe4e2; --astr:#b85a12; --astr-bg:#fcebdc; --off:#8a979d; --off-bg:#eceff0; --we:#eef1f2;
   --f-display:"IBM Plex Sans Condensed","Arial Narrow",system-ui,sans-serif; --f-body:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",sans-serif; --f-mono:"IBM Plex Mono",ui-monospace,Menlo,monospace;
 }
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
   --bg:#0f171b; --surface:#16222852; --surface:#172328; --ink:#e4edf0; --muted:#93a6ae; --line:#2a3a41; --accent:#4fb8c9; --accent-ink:#06262c; --soft:#1e2e35;
   --rea:#5fd0bd; --rea-bg:#123a34; --bloc:#8fb0f0; --bloc-bg:#1b2c4a; --rx:#c3a2ec; --rx-bg:#2e2242; --tdm:#b9a0f0;--tdm-bg:#2c2450;--consult:#e5bd5c; --consult-bg:#3a2e10;
-  --garde:#ff8f86; --garde-bg:#47201d; --astr:#f3a565; --astr-bg:#432a15; --off:#7d8c92; --off-bg:#212d32; --we:#131e23; color-scheme:dark}}
+  --staff:#c3cde0; --staff-bg:#28323f; --garde:#ff8f86; --garde-bg:#47201d; --astr:#f3a565; --astr-bg:#432a15; --off:#7d8c92; --off-bg:#212d32; --we:#131e23; color-scheme:dark}}
 :root[data-theme="dark"]{
   --bg:#0f171b; --surface:#172328; --ink:#e4edf0; --muted:#93a6ae; --line:#2a3a41; --accent:#4fb8c9; --accent-ink:#06262c; --soft:#1e2e35;
   --rea:#5fd0bd; --rea-bg:#123a34; --bloc:#8fb0f0; --bloc-bg:#1b2c4a; --rx:#c3a2ec; --rx-bg:#2e2242; --tdm:#b9a0f0;--tdm-bg:#2c2450;--consult:#e5bd5c; --consult-bg:#3a2e10;
-  --garde:#ff8f86; --garde-bg:#47201d; --astr:#f3a565; --astr-bg:#432a15; --off:#7d8c92; --off-bg:#212d32; --we:#131e23; color-scheme:dark}
+  --staff:#c3cde0; --staff-bg:#28323f; --garde:#ff8f86; --garde-bg:#47201d; --astr:#f3a565; --astr-bg:#432a15; --off:#7d8c92; --off-bg:#212d32; --we:#131e23; color-scheme:dark}
 *{box-sizing:border-box}
 body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:15px;line-height:1.45}
 body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--surface)}
@@ -49,6 +49,11 @@ details.box .in,.list{grid-template-columns:minmax(0,1fr)}
 .chip .per{font-weight:500;font-size:.75rem;opacity:.85}
 .g-rea{background:var(--rea-bg);color:var(--rea)} .g-bloc{background:var(--bloc-bg);color:var(--bloc)} .g-rx{background:var(--rx-bg);color:var(--rx)}
 .g-tdm{background:var(--tdm-bg);color:var(--tdm)} .g-consult{background:var(--consult-bg);color:var(--consult)} .g-garde{background:var(--garde-bg);color:var(--garde)} .g-astr{background:var(--astr-bg);color:var(--astr)}
+.g-staff{background:var(--staff-bg);color:var(--staff)}
+.chip .hr{font-weight:500;font-size:.75rem;font-variant-numeric:tabular-nums;opacity:.9}
+.mcell .chip{flex-wrap:wrap;row-gap:0}
+.mcell .chip .hr{flex-basis:100%;font-size:.66rem}
+@media (max-width:560px){.mcell .chip .hr{font-size:.56rem;letter-spacing:-.02em}}
 .g-off{background:var(--off-bg);color:var(--off)}
 
 /* day view */
@@ -240,7 +245,7 @@ function assignmentsFor(day, doc){
     if(!inAm&&!inPm) continue;
     const per = p.whole ? "" : p.fixed ? p.fixed : (inAm&&inPm ? "Journée" : inAm ? "Matin" : "Après-midi");
     const others = [...new Set([...(inAm?c.am:[]),...(inPm?c.pm:[])])].filter(x=>x!==doc);
-    out.push({post:p, per, others, mod:!!(day.mods&&day.mods[p.k])});
+    out.push({post:p, per, others, hours:P.hoursFor(p.k, per), mod:!!(day.mods&&day.mods[p.k])});
   }
   return out;
 }
@@ -281,11 +286,15 @@ function rebuild(){
 }
 
 /* ---------- affichage ---------- */
+const staffChip = (st, compact) => compact
+  ? `<span class="chip g-staff"><span class="lg">${esc(st.sh)}</span><span class="sh">Staff</span><span class="hr">${esc(st.h)}</span></span>`
+  : `<span class="chip g-staff">${esc(st.lbl)}<span class="hr">${esc(st.h)}</span></span>`;
 const chip = (a, compact) => {
   const per = a.per && a.per!=="Journée" && !a.post.fixed ? (a.per==="Matin"?"matin":"après-midi") : "";
   const dot = a.mod ? `<span class="moddot" title="Modifié"></span>` : "";
-  if(compact) return `<span class="chip g-${a.post.g}"><span class="lg">${esc(a.post.lbl)}</span><span class="sh">${esc(a.post.sh)}</span>${per?`<span class="per">${per==="matin"?"mat":"apm"}</span>`:""}${dot}</span>`;
-  return `<span class="chip g-${a.post.g}">${esc(a.post.lbl)}${per?`<span class="per">${per}</span>`:""}${dot}</span>`;
+  const hr = a.hours ? `<span class="hr">${esc(a.hours)}</span>` : "";
+  if(compact) return `<span class="chip g-${a.post.g}"><span class="lg">${esc(a.post.lbl)}</span><span class="sh">${esc(a.post.sh)}</span>${per&&!a.hours?`<span class="per">${per==="matin"?"mat":"apm"}</span>`:""}${dot}${hr}</span>`;
+  return `<span class="chip g-${a.post.g}">${esc(a.post.lbl)}${per?`<span class="per">${per}</span>`:""}${hr}${dot}</span>`;
 };
 function renderWho(){
   $("who").innerHTML = doctors.map(d=>`<button data-doc="${esc(d)}" aria-pressed="${S.doc===d}">${esc(d)}</button>`).join("")
@@ -312,8 +321,9 @@ function renderDay(){
     h+=`<div class="mine">`;
     if(!as.length) h+=`<div class="empty"><b>${esc(S.doc)}</b> n'a pas de poste ce jour${ex.length?` · ${esc(ex.join(", "))}`:""}.</div>`;
     for(const a of as) h+=`<div class="assign"><div class="big g-${a.post.g}">${esc(a.post.lbl)}</div>
-      <div><b>${a.per?esc(a.per):esc(a.post.lbl)}</b></div>
+      <div><b>${a.per?esc(a.per):esc(a.post.lbl)}${a.hours?` · ${esc(a.hours)}`:""}</b></div>
       <div class="meta">${a.others.length?`Avec <b>${esc(a.others.join(", "))}</b>`:"Seul(e) sur le poste"}</div></div>`;
+    for(const st of P.staffFor(day,S.doc)) h+=`<div class="assign"><div class="big g-staff">Staff</div><div><b>${esc(st.lbl)} · ${esc(st.h)}</b></div><div class="meta">Avant votre poste du jour</div></div>`;
     if(as.length && ex.length) h+=`<p class="note">${esc(ex.join(", "))}</p>`;
     h+=`</div>`;
   }
@@ -329,7 +339,11 @@ function renderDay(){
       who = c.am.join()===c.pm.join() ? mark(c.am) : `${mark(c.am)} / ${mark(c.pm)}`;
     }
     const open = E.date===s && E.post===p.k;
-    h+=`<li class="${Backend.canEdit?"ed":""}" ${Backend.canEdit?`data-edit="${p.k}" tabindex="0" role="button" aria-expanded="${open}"`:""}><span class="chip g-${c&&c.closed||!c?"off":p.g}">${esc(p.lbl)}</span><span class="who2">${who} ${mod?`<span class="moddot" title="Modifié"></span>`:""}</span></li>`;
+    let thr = "";
+    if(c && !c.closed){ const all=P.hoursFor(p.k,"*"); if(all) thr=all;
+      else if(c.am.join()===c.pm.join()) thr=P.hoursFor(p.k, p.fixed||"Journée");
+      else thr=[c.am.length?P.hoursFor(p.k,"Matin"):"", c.pm.length?P.hoursFor(p.k,"Après-midi"):""].filter(Boolean).join(" / "); }
+    h+=`<li class="${Backend.canEdit?"ed":""}" ${Backend.canEdit?`data-edit="${p.k}" tabindex="0" role="button" aria-expanded="${open}"`:""}><span class="chip g-${c&&c.closed||!c?"off":p.g}">${esc(p.lbl)}${thr?`<span class="hr">${esc(thr)}</span>`:""}</span><span class="who2">${who} ${mod?`<span class="moddot" title="Modifié"></span>`:""}</span></li>`;
     if(open) h+=editorHtml(day, p, mod);
   }
   v.innerHTML=h+`</ul></div>`;
@@ -343,7 +357,7 @@ function renderWeek(){
     let c;
     if(!day) c=`<span class="none">Pas de planning importé</span>`;
     else { const as=assignmentsFor(day,S.doc), ex=dayExtras(s,S.doc);
-      c = as.map(a=>chip(a)).join("") || `<span class="none">${isOffDay(day)?"Repos":"Pas de poste"}</span>`;
+      c = P.staffFor(day,S.doc).map(st=>staffChip(st)).join("") + as.map(a=>chip(a)).join("") || `<span class="none">${isOffDay(day)?"Repos":"Pas de poste"}</span>`;
       if(ex.length) c+=`<span class="chip g-off">${esc(ex.join(", "))}</span>`; }
     h+=`<button class="wrow${(day?isOffDay(day):i>4)?" we":""}${s===t?" today":""}" data-go="${s}">
       <span class="d"><b>${DAYCAP(DAYS[dt.getUTCDay()]).slice(0,3)}. ${dt.getUTCDate()}</b><span>${esc(MONTHS[dt.getUTCMonth()])}</span></span>
@@ -360,7 +374,7 @@ function renderMonth(){
   for(let s=start; s<=last || wd(s)!==1; s=addDays(s,1)){
     const day=byDate[s], as = day ? assignmentsFor(day,S.doc) : [];
     h+=`<button class="mcell${(day?isOffDay(day):(wd(s)%6===0))?" we":""}${s.slice(0,7)!==first.slice(0,7)?" out":""}${s===t?" today":""}" data-go="${s}" aria-label="${esc(fmtLong(s))}">
-      <span class="n">${D(s).getUTCDate()}</span>${as.map(a=>chip(a,true)).join("")}</button>`;
+      <span class="n">${D(s).getUTCDate()}</span>${day?P.staffFor(day,S.doc).map(st=>staffChip(st,true)).join(""):""}${as.map(a=>chip(a,true)).join("")}</button>`;
   }
   v.innerHTML=h+`</div></div>`;
 }
@@ -387,7 +401,7 @@ function renderInner(){
   if(!S.doc){ v.innerHTML=`<div class="empty">Choisissez vos initiales en haut pour voir votre planning.</div>`; return; }
   ({day:renderDay,week:renderWeek,month:renderMonth})[S.view]();
 }
-$("legend").innerHTML = [["rea","Réanimation"],["bloc","Bloc"],["tdm","Radio TDM"],["rx","Radio"],["consult","Consultation"],["garde","Garde"],["astr","Astreinte"]]
+$("legend").innerHTML = [["rea","Réanimation"],["bloc","Bloc"],["tdm","Radio TDM"],["rx","Radio"],["consult","Consultation"],["garde","Garde"],["astr","Astreinte"],["staff","Staff de programmation"]]
   .map(([g,l])=>`<span class="chip g-${g}">${l}</span>`).join("");
 
 /* ---------- modification d'une case ---------- */

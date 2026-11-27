@@ -240,11 +240,28 @@ function parseDocxDom(doc, fname){
   return {my, format: fmt, days: res.days, warn: res.warn};
 }
 
+/* Horaires des postes (Eric, 27/11/2026). Clé "*" = mêmes horaires quelle que soit la demi-journée. */
+const HOURS = {
+  bloc1:{"Matin":"7h30-13h","Après-midi":"13h-18h30","Journée":"7h30-18h30"},
+  bloc2:{"Matin":"7h30-13h","Après-midi":"13h-18h30","Journée":"7h30-18h30"},
+  bloc3:{"Matin":"7h30-13h"},
+  rea1:{"*":"8h30-18h30"}, rea2:{"*":"8h30-18h30"}, rea3:{"*":"8h30-15h"}, rea4:{"*":"8h30-14h"},
+  tdm:{"*":"7h30-13h30"}, consultm:{"*":"10h-12h"}, consulta:{"*":"14h-17h"}
+};
+function hoursFor(k, per){ const h=HOURS[k]; return h ? (h["*"] || h[per] || "") : ""; }
+/* Staffs de programmation : Bloc 3 le vendredi, Consultation du matin le mercredi. */
+function staffFor(day, doc){
+  const out=[], w=wd(day.d), has = k => { const c=parseCell(day.c[k]); return !!(c && !c.closed && (c.am.includes(doc)||c.pm.includes(doc))); };
+  if(w===5 && has("bloc3")) out.push({lbl:"Staff de programmation bloc", sh:"Staff bloc", h:"9h"});
+  if(w===3 && has("consultm")) out.push({lbl:"Staff de programmation radio", sh:"Staff radio", h:"9h"});
+  return out;
+}
+
 function monthRecord(r, source){
   const key = `${r.my.y}-${String(r.my.m+1).padStart(2,"0")}`;
   return {key, title:`${cap(MONTHS[r.my.m])} ${r.my.y}`, source, importedAt:new Date().toISOString(), days:r.days};
 }
 
-const api = {POSTS, DAYS, MONTHS, cap, iso, D, addDays, wd, fmtLong, parseCell, showCell, upgradeLegacy, findMonthYear, parsePdfItems, parseDocxDom, monthRecord};
+const api = {HOURS, hoursFor, staffFor, POSTS, DAYS, MONTHS, cap, iso, D, addDays, wd, fmtLong, parseCell, showCell, upgradeLegacy, findMonthYear, parsePdfItems, parseDocxDom, monthRecord};
 if(typeof module==="object" && module.exports) module.exports = api; else root.NarParser = api;
 })(typeof globalThis!=="undefined" ? globalThis : this);
